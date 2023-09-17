@@ -1,4 +1,4 @@
-# Project 1 - Simple List
+# Project 2 - Remote List
 
 Written By: Joshua Corrales
 Class: CS402-001

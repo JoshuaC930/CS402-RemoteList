@@ -1,17 +1,8 @@
-import { TouchableOpacity, FlatList, StyleSheet, Text, View, Modal, TextInput, Button, Platform, StatusBar } from "react-native";
-import React, { useState } from 'react';
+import { TouchableOpacity, StyleSheet, Text, View, Modal, TextInput, Button, Platform, StatusBar, VirtualizedList } from "react-native";
+import React, { useEffect, useState } from 'react';
 import { SafeAreaView } from "react-native";
 import { ScrollView } from "react-native";
 
-//list varable for names
-var nameList = [
-    { key: 'Angel', selected: false },
-    { key: 'Azure', selected: false },
-    { key: 'Barret', selected: false },
-    { key: 'Cloud', selected: false },
-    { key: 'Tifa', selected: false },
-    { key: 'Aerith', selected: false }
-]
 
 //list object
 const Item = ({ item, onPress, backgroundColor, textColor }) => (
@@ -44,11 +35,46 @@ const ModalInput = ({ onTextChange, onSubmit, visible, value, toggle }) => {
     );
 }
 
+//list varable for names
+var emptydata = [];
+
 //main function
-const FlatListBasics = () => {
-    const [list, setList] = useState(nameList);
+const VirtualList = () => {
+    const [list, setList] = useState(emptydata);
     const [visible, setVisible] = useState(false);
     const [text, onTextChange] = useState('');
+
+    //required functions for <VirtualList> component
+    const getItemCount = (data) => list.length;
+    const getItem = (data, index) => (list[index]);
+
+    //function for loading names into list
+    async function load() {
+        var url = "https://cs.boisestate.edu/~scutchin/cs402/codesnips/loadjson.php?user=joshuacorrales930";
+        const response = await fetch(url);
+        const names = await response.json().catch(() => alert("Nothing to load!"));
+        const newList = [];
+        names.forEach((item) => {
+            newList.push(item)
+        })
+
+        setList(newList);
+    }
+
+    //load data when app starts
+    useEffect(() => load(), [])
+
+    async function save() {
+        var url = "https://cs.boisestate.edu/~scutchin/cs402/codesnips/savejson.php?user=joshuacorrales930";
+        const requestOptions = {
+            method: 'POST',
+            headers: {'Content-Type': 'application/json' },
+            body: JSON.stringify(list)
+        };
+
+        await fetch(url, requestOptions);
+        alert("Saved data to server!");
+    }
 
     const renderItem = ({ item }) => {
         var backgroundColor, color;
@@ -150,22 +176,12 @@ const FlatListBasics = () => {
         })
     }
 
-    //function for resetting list
-    function reset() {
-        setList([...nameList]);
-    }
-
-    //function for selecting all items on list
-    function selectAll() {
-        list.forEach((item) =>
-            toggleList(item)
-        )
-    }
+    
 
     return (
         <SafeAreaView style={[styles.container, { paddingTop: Platform.OS === "android" ? StatusBar.currentHeight : 20 }]}>
             <View>
-                <Text style={styles.title}>A Simple List</Text>
+                <Text style={styles.title}>A Remote List</Text>
                 <Text style={styles.instruction}>Use the the buttons below to modify the list.</Text>
             </View>
             <View>
@@ -174,7 +190,8 @@ const FlatListBasics = () => {
                     <Button style={styles.button} title='Remove' onPress={() => remove()} />
                     <Button title='Join' onPress={() => join()} />
                     <Button title='Split' onPress={() => split()} />
-                    <Button title='Reset' onPress={() => reset()} />
+                    <Button title='Load' onPress={() => load()} />
+                    <Button title='Save' onPress={() => save()} />
                 </View>
             </View>
             <ModalInput
@@ -184,9 +201,17 @@ const FlatListBasics = () => {
                 toggle={() => setVisible(!visible)}
                 onSubmit={() => { onTextChange(''); add(text); setVisible(!visible) }}
             />
-            <ScrollView style={styles.list}>
-                <FlatList data={list} renderItem={renderItem} />
-            </ScrollView>
+            {/* <ScrollView style={styles.list}>
+                
+            </ScrollView> */}
+            <VirtualizedList 
+                    data={emptydata}
+                    initialNumToRender={4}
+                    renderItem={renderItem}
+                    keyExtractor={(item,index) => index}
+                    getItemCount={getItemCount}
+                    getItem={getItem}
+                />
         </SafeAreaView>
     )
 }
@@ -235,4 +260,4 @@ const styles = StyleSheet.create({
     }
 })
 
-export default FlatListBasics;
+export default VirtualList;
