@@ -48,21 +48,28 @@ const VirtualList = () => {
     const getItemCount = (data) => list.length;
     const getItem = (data, index) => (list[index]);
 
-    //function for loading names into list
+    // Function for loading names into list
     async function load() {
-        var url = "https://cs.boisestate.edu/~scutchin/cs402/codesnips/loadjson.php?user=joshuacorrales930";
+        try {
+            var url = "https://cs.boisestate.edu/~scutchin/cs402/codesnips/loadjson.php?user=joshuacorrales930";
         const response = await fetch(url);
-        const names = await response.json().catch(() => alert("Nothing to load!"));
+        const names = await response.json();
         const newList = [];
         names.forEach((item) => {
-            newList.push(item)
-        })
-
-        setList(newList);
+            newList.push(item);
+        });
+  
+            setList(newList);
+        } catch (error) {
+            alert("Nothing to load!");
+        }
     }
-
-    //load data when app starts
-    useEffect(() => load(), [])
+  
+    // Load data when app starts
+    useEffect(() => {
+        load();
+    }, []);
+  
 
     async function save() {
         var url = "https://cs.boisestate.edu/~scutchin/cs402/codesnips/savejson.php?user=joshuacorrales930";
