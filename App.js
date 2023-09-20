@@ -1,8 +1,6 @@
 import { TouchableOpacity, StyleSheet, Text, View, Modal, TextInput, Button, Platform, StatusBar, VirtualizedList } from "react-native";
 import React, { useEffect, useState } from 'react';
 import { SafeAreaView } from "react-native";
-import { ScrollView } from "react-native";
-
 
 //list object
 const Item = ({ item, onPress, backgroundColor, textColor }) => (
@@ -59,7 +57,9 @@ const VirtualList = () => {
             newList.push(item);
         });
   
-            setList(newList);
+        setList(newList);
+        alert("Loaded data from server!");
+
         } catch (error) {
             alert("Nothing to load!");
         }
